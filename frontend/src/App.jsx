@@ -24,8 +24,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 export const AuthContext = createContext(null)
 export const ThemeContext = createContext(null)
 
-// Configure base API URL
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
+// Configure base API URL — uses VITE_API_BASE_URL on Render, empty string locally (Vite proxy)
+axios.defaults.baseURL = (typeof __API_BASE__ !== 'undefined' && __API_BASE__) ? __API_BASE__ : 'http://127.0.0.1:8000'
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '')
@@ -131,20 +131,20 @@ function DashboardLayout({ children }) {
   const { user } = useContext(AuthContext)
   
   return (
-    <div className="relative flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans text-slate-800 dark:text-slate-200">
-      {/* Decorative Lights */}
-      <div className="glow-spot w-[400px] h-[400px] top-[-100px] left-[-100px] bg-emerald-500/10 dark:bg-emerald-500/5"></div>
-      <div className="glow-spot w-[600px] h-[600px] bottom-[-200px] right-[-100px] bg-indigo-500/10 dark:bg-indigo-500/5"></div>
-      
-      {/* Sidebar navigation */}
+    <div style={{ position: 'relative', display: 'flex', height: '100vh', background: '#f8fafc', overflow: 'hidden', fontFamily: "'Inter', sans-serif", color: '#0f172a' }}>
+      {/* Decorative glow spots */}
+      <div style={{ position: 'absolute', top: '-80px', right: '-80px', width: '400px', height: '400px', background: 'rgba(59,130,246,0.06)', borderRadius: '9999px', filter: 'blur(80px)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-100px', left: '-60px', width: '500px', height: '500px', background: 'rgba(99,102,241,0.04)', borderRadius: '9999px', filter: 'blur(100px)', pointerEvents: 'none' }} />
+
+      {/* Sidebar */}
       <Sidebar />
 
-      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-        {/* Top Navbar */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative', zIndex: 10 }}>
+        {/* Navbar */}
         <Navbar />
 
-        {/* Content Section */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50 dark:bg-slate-950/20">
+        {/* Content */}
+        <main style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem', background: '#f8fafc' }}>
           {children}
         </main>
       </div>

@@ -146,11 +146,14 @@ def parse_resume(pdf_path: str) -> Dict:
     if raw_text.startswith("Error"):
         return {
             "name": "Unknown",
+            "college": "",
+            "branch": "",
+            "grad_year": None,
+            "cgpa": 0.0,
             "skills": [],
             "programming_languages": [],
             "projects": [],
             "certifications": [],
-            "cgpa": 0.0,
             "text": raw_text
         }
         

@@ -1,6 +1,7 @@
 import os
 import json
 import uuid
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from backend.database.connection import get_db
@@ -19,8 +20,42 @@ async def upload_resume(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # 1. Rate Limiting check
+    one_hour_ago = datetime.utcnow() - timedelta(hours=1)
+    upload_count = db.query(Resume).filter(
+        Resume.user_id == current_user.id,
+        Resume.uploaded_at >= one_hour_ago
+    ).count()
+    if upload_count >= settings.MAX_RESUME_UPLOADS_PER_HOUR:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Upload limit reached. Maximum {settings.MAX_RESUME_UPLOADS_PER_HOUR} uploads per hour are allowed."
+        )
+
+    # 2. Extension check
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+    # 3. Read content for size and magic-byte checks
+    try:
+        content = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to read file: {str(e)}")
+
+    # 4. Max size check
+    if len(content) > settings.MAX_RESUME_SIZE:
+        max_mb = settings.MAX_RESUME_SIZE / (1024 * 1024)
+        raise HTTPException(
+            status_code=400,
+            detail=f"File size exceeds the limit of {max_mb:.1f}MB."
+        )
+
+    # 5. Magic-byte check (%PDF)
+    if not content.startswith(b"%PDF"):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file format. The file is not a valid PDF document."
+        )
         
     # Generate unique filename
     unique_filename = f"{uuid.uuid4()}_{file.filename}"
@@ -29,7 +64,6 @@ async def upload_resume(
     try:
         # Save file to uploads folder
         with open(file_path, "wb") as f:
-            content = await file.read()
             f.write(content)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save file: {str(e)}")
@@ -76,18 +110,19 @@ async def upload_resume(
                 target_role="",
                 target_companies="",
                 study_hours=0,
-                preferred_lang="Python"
+                preferred_lang="Python",
+                is_auto_generated=True  # Initially marked auto-generated
             )
             db.add(profile)
         else:
-            # Update only if fields are empty to preserve manual edits, or if they contain mock placeholder values
-            if not profile.name or profile.name in ("Candidate", "Alex Mercer"):
+            # Update only if fields are empty to preserve manual edits, or if the profile is auto-generated
+            if profile.is_auto_generated or not profile.name:
                 profile.name = extracted_data["name"] or "Candidate"
-            if not profile.college or profile.college == "State Technical University":
+            if profile.is_auto_generated or not profile.college:
                 profile.college = extracted_data["college"]
-            if not profile.branch or profile.branch == "Computer Science & Engineering":
+            if profile.is_auto_generated or not profile.branch:
                 profile.branch = extracted_data["branch"]
-            if not profile.cgpa or profile.cgpa in (0.0, 8.2):
+            if profile.is_auto_generated or not profile.cgpa:
                 profile.cgpa = extracted_data["cgpa"]
             
             # Merge skills and programming languages

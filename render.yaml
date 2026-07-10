@@ -1,0 +1,40 @@
+# render.yaml — Render Blueprint for CampusAI
+# Deploy BOTH backend and frontend from a single repository
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # ─── Backend: FastAPI on Uvicorn ──────────────────────────────────────────
+  - type: web
+    name: campusai-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://campusai_user:7vEMP6P64PF2AXYSg0290mC8TSwM7VGJ@dpg-d98ch6d7vvec739cbitg-a.oregon-postgres.render.com/campusai
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false          # You will paste this in the Render dashboard
+      - key: ALLOWED_ORIGINS
+        sync: false          # Paste your frontend URL after deploying frontend
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+
+  # ─── Frontend: Vite / React Static Site ───────────────────────────────────
+  - type: web
+    name: campusai-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false          # Paste your backend URL after it's deployed
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

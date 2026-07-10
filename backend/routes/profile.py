@@ -99,7 +99,8 @@ def update_profile(
             target_role=profile_in.target_role,
             target_companies=companies_str,
             study_hours=profile_in.study_hours,
-            preferred_lang=profile_in.preferred_lang
+            preferred_lang=profile_in.preferred_lang,
+            is_auto_generated=False
         )
         db.add(profile)
     else:
@@ -116,6 +117,7 @@ def update_profile(
         profile.target_companies = companies_str
         profile.study_hours = profile_in.study_hours
         profile.preferred_lang = profile_in.preferred_lang
+        profile.is_auto_generated = False
         
     db.commit()
     db.refresh(profile)

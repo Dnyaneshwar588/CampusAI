@@ -1,14 +1,14 @@
 import React, { useContext } from 'react'
 import { NavLink } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  UserSquare2, 
-  FileText, 
-  Building2, 
-  BookOpen, 
-  MessageSquare, 
-  Bot, 
-  Sparkles 
+import {
+  LayoutDashboard,
+  UserSquare2,
+  FileText,
+  Building2,
+  BookOpen,
+  MessageSquare,
+  Bot,
+  Sparkles
 } from 'lucide-react'
 import { AuthContext } from '../App'
 
@@ -16,56 +16,120 @@ export default function Sidebar() {
   const { user } = useContext(AuthContext)
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'My Profile', path: '/profile', icon: UserSquare2 },
-    { name: 'Resume Analyzer', path: '/resume', icon: FileText },
+    { name: 'Dashboard',       path: '/dashboard', icon: LayoutDashboard },
+    { name: 'My Profile',      path: '/profile',   icon: UserSquare2 },
+    { name: 'Resume Analyzer', path: '/resume',    icon: FileText },
     { name: 'Company Matcher', path: '/companies', icon: Building2 },
-    { name: 'Study Planner', path: '/planner', icon: BookOpen },
-    { name: 'Mock Interview', path: '/interview', icon: MessageSquare },
-    { name: 'Career Assistant', path: '/chat', icon: Bot },
+    { name: 'Study Planner',   path: '/planner',   icon: BookOpen },
+    { name: 'Mock Interview',  path: '/interview', icon: MessageSquare },
+    { name: 'Career Assistant',path: '/chat',      icon: Bot },
   ]
 
   return (
-    <aside className="w-64 border-r border-slate-200/50 dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/40 backdrop-blur-md flex flex-col h-screen z-20">
-      {/* Brand Header Logo */}
-      <div className="h-16 flex items-center gap-2 px-6 border-b border-slate-200/50 dark:border-slate-800/80">
-        <div className="h-8 w-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
-          <Sparkles size={16} className="animate-pulse" />
+    <aside style={{
+      width: '250px',
+      borderRight: '1px solid #e2e8f0',
+      background: '#ffffff',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '100vh',
+      zIndex: 20,
+      boxShadow: '2px 0 12px rgba(15,23,42,0.04)',
+      flexShrink: 0,
+    }}>
+      {/* Brand */}
+      <div style={{
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        padding: '0 1.5rem',
+        borderBottom: '1px solid #f1f5f9',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          width: '34px', height: '34px',
+          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+          borderRadius: '10px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(59,130,246,0.35)',
+          flexShrink: 0,
+        }}>
+          <Sparkles size={15} color="#fff" />
         </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-bold leading-none text-slate-800 dark:text-slate-100 font-display">Campus AI</span>
-          <span className="text-[10px] text-slate-400 font-medium">Placement Strategist</span>
+        <div>
+          <p style={{ fontWeight: 800, fontSize: '0.9375rem', color: '#0f172a', lineHeight: 1, fontFamily: "'Outfit', sans-serif" }}>Campus AI</p>
+          <p style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '2px', fontWeight: 500 }}>Placement Strategist</p>
         </div>
       </div>
 
-      {/* Navigation List */}
-      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
-        {navItems.map((item) => {
-          const Icon = item.icon
-          return (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group
-                ${isActive 
-                  ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/10' 
-                  : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-slate-200'}
-              `}
-            >
-              <Icon size={18} className="transition-transform group-hover:scale-105 duration-200" />
-              <span>{item.name}</span>
-            </NavLink>
-          )
-        })}
+      {/* Nav */}
+      <nav style={{ flex: 1, padding: '1rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto' }}>
+        {navItems.map(({ name, path, icon: Icon }) => (
+          <NavLink
+            key={name}
+            to={path}
+            style={({ isActive }) => ({
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              padding: '0.625rem 0.875rem',
+              borderRadius: '0.625rem',
+              fontSize: '0.8125rem',
+              fontWeight: isActive ? 600 : 500,
+              textDecoration: 'none',
+              transition: 'all 0.15s',
+              background: isActive ? 'linear-gradient(135deg, #eff6ff, #dbeafe)' : 'transparent',
+              color: isActive ? '#1d4ed8' : '#64748b',
+              borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
+            })}
+            onMouseEnter={e => {
+              if (!e.currentTarget.classList.contains('active')) {
+                e.currentTarget.style.background = '#f8fafc'
+                e.currentTarget.style.color = '#1e293b'
+              }
+            }}
+            onMouseLeave={e => {
+              if (!e.currentTarget.querySelector('[data-active]')) {
+                const isActive = e.currentTarget.style.borderLeft === '3px solid rgb(59, 130, 246)'
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = '#64748b'
+                }
+              }
+            }}
+          >
+            {({ isActive }) => (
+              <>
+                <Icon size={17} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.7 }} />
+                <span>{name}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
       </nav>
 
-      {/* Footer Info */}
-      <div className="p-4 border-t border-slate-200/50 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/20">
-        <div className="flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate">Logged in as</p>
-            <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+      {/* Footer */}
+      <div style={{
+        padding: '0.875rem 1.25rem',
+        borderTop: '1px solid #f1f5f9',
+        background: '#fafbfd',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+          <div style={{
+            width: '30px', height: '30px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <span style={{ color: '#fff', fontSize: '0.6875rem', fontWeight: 700 }}>
+              {user?.email?.[0]?.toUpperCase() || 'U'}
+            </span>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ fontSize: '0.6875rem', fontWeight: 600, color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Logged in as</p>
+            <p style={{ fontSize: '0.625rem', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.email}</p>
           </div>
         </div>
       </div>

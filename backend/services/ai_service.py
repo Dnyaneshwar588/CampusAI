@@ -1,36 +1,26 @@
 import json
 import logging
 from groq import Groq
-import google.generativeai as genai
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
 
 # Initialize clients
 _groq_client = None
-_gemini_model = None
 
 if settings.GROQ_API_KEY:
     _groq_client = Groq(api_key=settings.GROQ_API_KEY)
     logger.info("Groq client initialized successfully.")
 
-if settings.GEMINI_API_KEY:
-    try:
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        _gemini_model = genai.GenerativeModel('gemini-1.5-flash')
-        logger.info("Gemini client initialized successfully.")
-    except Exception as e:
-        logger.error(f"Failed to initialize Gemini: {e}")
-
-if not _groq_client and not _gemini_model:
-    logger.warning("Neither GROQ_API_KEY nor GEMINI_API_KEY is set. Running in dummy mock response mode.")
+if not _groq_client:
+    logger.warning("GROQ_API_KEY is not set. Running in dummy mock response mode.")
 
 # Model to use for Groq
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
 def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
-    """Helper to run a Groq or Gemini generation prompt with optional system instruction."""
+    """Helper to run a Groq generation prompt with optional system instruction."""
     if _groq_client:
         messages = []
         if system_instruction:
@@ -47,26 +37,12 @@ def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
         except Exception as e:
             logger.error(f"Error calling Groq API: {e}")
             raise e
-    elif _gemini_model:
-        try:
-            if system_instruction:
-                temp_model = genai.GenerativeModel(
-                    'gemini-1.5-flash',
-                    system_instruction=system_instruction
-                )
-                response = temp_model.generate_content(prompt)
-            else:
-                response = _gemini_model.generate_content(prompt)
-            return response.text
-        except Exception as e:
-            logger.error(f"Error calling Gemini API: {e}")
-            raise e
     else:
-        raise ValueError("Neither GROQ_API_KEY nor GEMINI_API_KEY is configured")
+        raise ValueError("GROQ_API_KEY is not configured")
 
 
 def run_gemini_json_prompt(prompt: str, system_instruction: str = None) -> dict:
-    """Helper to run a Groq or Gemini prompt and force a JSON output structure."""
+    """Helper to run a Groq prompt and force a JSON output structure."""
     raw = ""
     if _groq_client:
         sys_content = (system_instruction + " Always respond with valid JSON only.") if system_instruction else "Always respond with valid JSON only."
@@ -86,22 +62,8 @@ def run_gemini_json_prompt(prompt: str, system_instruction: str = None) -> dict:
         except Exception as e:
             logger.error(f"Error generating JSON with Groq: {e}")
             return _parse_json_cleanup(raw, e)
-    elif _gemini_model:
-        try:
-            sys_content = (system_instruction + " Always respond with valid JSON only.") if system_instruction else "Always respond with valid JSON only."
-            temp_model = genai.GenerativeModel(
-                'gemini-1.5-flash',
-                system_instruction=sys_content,
-                generation_config={"response_mime_type": "application/json"}
-            )
-            response = temp_model.generate_content(prompt)
-            raw = response.text
-            return json.loads(raw)
-        except Exception as e:
-            logger.error(f"Error generating JSON with Gemini: {e}")
-            return _parse_json_cleanup(raw, e)
     else:
-        raise ValueError("Neither GROQ_API_KEY nor GEMINI_API_KEY is configured")
+        raise ValueError("GROQ_API_KEY is not configured")
 
 
 def _parse_json_cleanup(raw: str, e: Exception) -> dict:

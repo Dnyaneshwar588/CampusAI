@@ -36,6 +36,7 @@ class StudentProfile(Base):
     target_companies = Column(Text, default="")  # comma-separated
     study_hours = Column(Integer, default=0)
     preferred_lang = Column(String, default="Python")
+    is_auto_generated = Column(Boolean, default=False)
     
     user = relationship("User", back_populates="profile")
 

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Sun, Moon, LogOut, ShieldAlert, User as UserIcon } from 'lucide-react'
+import { Sun, Moon, LogOut, ShieldAlert, User as UserIcon, Bell } from 'lucide-react'
 import { AuthContext, ThemeContext } from '../App'
 
 export default function Navbar() {
@@ -8,74 +8,131 @@ export default function Navbar() {
   const { darkMode, toggleTheme } = useContext(ThemeContext)
   const navigate = useNavigate()
   const location = useLocation()
-  
-  const handleLogout = () => {
-    logout()
-    navigate('/')
-  }
-  
-  // Format current page header title based on route
+
+  const handleLogout = () => { logout(); navigate('/') }
+
   const getHeaderTitle = () => {
-    const path = location.pathname;
+    const path = location.pathname
     if (path.includes('/dashboard')) return 'Student Dashboard'
-    if (path.includes('/profile')) return 'Placement Profile'
-    if (path.includes('/resume')) return 'AI Resume Analyzer'
+    if (path.includes('/profile'))   return 'Placement Profile'
+    if (path.includes('/resume'))    return 'AI Resume Analyzer'
     if (path.includes('/companies')) return 'Company Matcher'
-    if (path.includes('/planner')) return 'Study Planner'
+    if (path.includes('/planner'))   return 'Study Planner'
     if (path.includes('/interview')) return 'Mock Interview Console'
-    if (path.includes('/chat')) return 'AI Career Assistant'
-    if (path.includes('/admin')) return 'Admin Panel'
+    if (path.includes('/chat'))      return 'AI Career Assistant'
+    if (path.includes('/admin'))     return 'Admin Panel'
     return 'Placement Strategist'
   }
 
-  return (
-    <header className="flex h-16 items-center justify-between border-b border-slate-200/50 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/30 backdrop-blur-md px-6 md:px-8 z-20">
-      <h1 className="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-500 to-indigo-600 bg-clip-text text-transparent font-display">
-        {getHeaderTitle()}
-      </h1>
+  const iconBtn = {
+    padding: '0.4375rem',
+    borderRadius: '0.625rem',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.15s',
+    color: '#64748b',
+  }
 
-      <div className="flex items-center gap-4">
-        {/* Toggle Theme Button */}
+  return (
+    <header style={{
+      display: 'flex',
+      height: '64px',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottom: '1px solid #f1f5f9',
+      background: 'rgba(255,255,255,0.95)',
+      backdropFilter: 'blur(12px)',
+      padding: '0 1.5rem 0 2rem',
+      zIndex: 20,
+      flexShrink: 0,
+    }}>
+      {/* Title */}
+      <div>
+        <h1 style={{
+          fontSize: '1.0625rem',
+          fontWeight: 700,
+          color: '#0f172a',
+          fontFamily: "'Outfit', sans-serif",
+          background: 'linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          lineHeight: 1,
+        }}>
+          {getHeaderTitle()}
+        </h1>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-colors"
-          title="Toggle Light/Dark Mode"
+          style={iconBtn}
+          title="Toggle Theme"
+          onMouseEnter={e => { e.currentTarget.style.background = '#f1f5f9'; e.currentTarget.style.color = '#1e293b' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#64748b' }}
         >
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          {darkMode ? <Sun size={18} /> : <Moon size={18} />}
         </button>
 
-        {/* Admin Dashboard Navigation */}
+        {/* Admin link */}
         {user?.is_admin && (
           <Link
             to={location.pathname === '/admin' ? '/dashboard' : '/admin'}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-indigo-500/10 text-indigo-600 hover:bg-indigo-500/20 dark:bg-indigo-500/20 dark:text-indigo-400 dark:hover:bg-indigo-500/30 transition-all"
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.375rem',
+              padding: '0.375rem 0.75rem', borderRadius: '0.625rem',
+              background: 'rgba(99,102,241,0.08)',
+              color: '#6366f1', fontSize: '0.75rem', fontWeight: 600,
+              textDecoration: 'none', transition: 'background 0.15s',
+              border: '1px solid rgba(99,102,241,0.15)',
+            }}
           >
-            <ShieldAlert size={14} />
+            <ShieldAlert size={13} />
             {location.pathname === '/admin' ? 'Student View' : 'Admin Console'}
           </Link>
         )}
 
-        {/* User Card */}
-        <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-800 pl-4">
-          <div className="hidden md:flex flex-col text-right">
-            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+        {/* Divider */}
+        <div style={{ width: '1px', height: '28px', background: '#e2e8f0', margin: '0 0.25rem' }} />
+
+        {/* User info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="hidden md:block" style={{ textAlign: 'right' }}>
+            <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#1e293b', lineHeight: 1 }}>
               {user?.email.split('@')[0]}
-            </span>
-            <span className="text-xs text-slate-400">
+            </p>
+            <p style={{ fontSize: '0.6875rem', color: '#94a3b8', marginTop: '2px' }}>
               {user?.is_admin ? 'Administrator' : 'Student'}
-            </span>
-          </div>
-          
-          <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-emerald-400 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/10">
-            <UserIcon size={16} />
+            </p>
           </div>
 
+          {/* Avatar */}
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: 'linear-gradient(135deg, #60a5fa 0%, #2563eb 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(59,130,246,0.3)',
+            flexShrink: 0,
+          }}>
+            <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.8125rem' }}>
+              {user?.email?.[0]?.toUpperCase() || 'U'}
+            </span>
+          </div>
+
+          {/* Logout */}
           <button
             onClick={handleLogout}
-            className="rounded-lg p-2 text-red-500 hover:bg-red-500/10 transition-colors"
+            style={{ ...iconBtn, color: '#ef4444' }}
             title="Log Out"
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.08)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
           >
-            <LogOut size={18} />
+            <LogOut size={17} />
           </button>
         </div>
       </div>

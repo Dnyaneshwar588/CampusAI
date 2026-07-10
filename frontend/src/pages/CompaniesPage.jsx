@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import { 
-  Building2, 
-  MapPin, 
-  Wallet, 
-  CheckCircle, 
-  AlertTriangle, 
-  XOctagon, 
-  Sparkles, 
-  BookOpen, 
-  Terminal, 
+import {
+  Building2,
+  MapPin,
+  Wallet,
+  CheckCircle,
+  AlertTriangle,
+  XOctagon,
+  Sparkles,
+  BookOpen,
+  Terminal,
   ChevronRight,
   HelpCircle
 } from 'lucide-react'
@@ -19,7 +19,7 @@ export default function CompaniesPage() {
   const [companiesList, setCompaniesList] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('eligible')
-  
+
   // Modals state
   const [selectedCompany, setSelectedCompany] = useState(null)
   const [skillGapData, setSkillGapData] = useState(null)
@@ -99,11 +99,10 @@ export default function CompaniesPage() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-6 py-3 border-b-2 text-sm font-semibold transition-all ${
-              activeTab === tab.key 
-                ? `${tab.color} bg-slate-100/50 dark:bg-slate-900/30` 
+            className={`px-6 py-3 border-b-2 text-sm font-semibold transition-all ${activeTab === tab.key
+                ? `${tab.color} bg-slate-100/50 dark:bg-slate-900/30`
                 : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
+              }`}
           >
             <span>{tab.label}</span>
             <span className="ml-2 text-xs bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-full font-bold">
@@ -150,9 +149,8 @@ export default function CompaniesPage() {
                   </span>
                 </div>
                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full ${
-                    activeTab === 'eligible' ? 'bg-emerald-500' : activeTab === 'nearly_eligible' ? 'bg-amber-500' : 'bg-red-500'
-                  }`} style={{ width: `${comp.probability_score}%` }}></div>
+                  <div className={`h-full rounded-full ${activeTab === 'eligible' ? 'bg-emerald-500' : activeTab === 'nearly_eligible' ? 'bg-amber-500' : 'bg-red-500'
+                    }`} style={{ width: `${comp.probability_score}%` }}></div>
                 </div>
               </div>
 
