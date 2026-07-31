@@ -1,0 +1,4 @@
+-r requirements.txt
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.2
+spacy>=3.5.0

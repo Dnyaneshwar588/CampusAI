@@ -11,13 +11,17 @@ FAISS_AVAILABLE = False
 SentenceTransformer = None
 faiss = None
 
-try:
-    import faiss
-    from sentence_transformers import SentenceTransformer
-    FAISS_AVAILABLE = True
-    logger.info("FAISS and SentenceTransformers loaded successfully.")
-except ImportError:
-    logger.warning("FAISS or SentenceTransformers not available yet. Using keyword-based fallback for search.")
+# Bypass importing torch/sentence-transformers on Render free tier to prevent Out Of Memory (OOM) crash
+if os.getenv("DISABLE_VECTOR_SEARCH") == "True" or os.getenv("RENDER") == "true":
+    logger.info("Render environment or DISABLE_VECTOR_SEARCH detected. Skipping FAISS & SentenceTransformers imports to save memory.")
+else:
+    try:
+        import faiss
+        from sentence_transformers import SentenceTransformer
+        FAISS_AVAILABLE = True
+        logger.info("FAISS and SentenceTransformers loaded successfully.")
+    except ImportError:
+        logger.warning("FAISS or SentenceTransformers not available yet. Using keyword-based fallback for search.")
 
 class VectorDB:
     def __init__(self):
@@ -151,6 +155,8 @@ vector_db = VectorDB()
 def reinitialize_libraries():
     """Attempt to reload FAISS & SentenceTransformers if they were installed after first load."""
     global FAISS_AVAILABLE, SentenceTransformer, faiss
+    if os.getenv("DISABLE_VECTOR_SEARCH") == "True" or os.getenv("RENDER") == "true":
+        return
     try:
         import faiss
         from sentence_transformers import SentenceTransformer

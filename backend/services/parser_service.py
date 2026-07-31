@@ -17,11 +17,8 @@ try:
 except ImportError:
     logger.warning("PyMuPDF (fitz) not available yet. Using fallback text reader.")
 
-try:
-    import spacy
-    SPACY_AVAILABLE = True
-except ImportError:
-    logger.warning("spaCy not available yet. Using regex for local extraction.")
+# spaCy is imported dynamically inside functions to save memory at startup
+
 
 # List of common tech skills for local regex fallback extraction
 COMMON_TECH_SKILLS = [
@@ -103,6 +100,9 @@ def local_regex_extraction(text: str) -> Dict:
 def spacy_extraction(text: str) -> Dict:
     """Extract education, organisations (companies), and projects using spaCy NER model."""
     global SPACY_AVAILABLE, spacy
+    import os
+    if os.getenv("RENDER") == "true" or os.getenv("DISABLE_SPACY") == "True":
+        return {"organizations": [], "education": []}
     if not SPACY_AVAILABLE or spacy is None:
         try:
             import spacy
