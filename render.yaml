@@ -18,6 +18,8 @@ services:
         generateValue: true
       - key: GROQ_API_KEY
         sync: false          # You will paste this in the Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false          # You will paste this in the Render dashboard
       - key: ALLOWED_ORIGINS
         sync: false          # Paste your frontend URL after deploying frontend
       - key: PYTHONPATH
