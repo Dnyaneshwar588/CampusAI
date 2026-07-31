@@ -1,7 +1,6 @@
 import os
 import pickle
 import logging
-import numpy as np
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
@@ -10,6 +9,7 @@ logger = logging.getLogger(__name__)
 FAISS_AVAILABLE = False
 SentenceTransformer = None
 faiss = None
+np = None
 
 # Bypass importing torch/sentence-transformers on Render free tier to prevent Out Of Memory (OOM) crash
 if os.getenv("DISABLE_VECTOR_SEARCH") == "True" or os.getenv("RENDER") == "true":
@@ -17,6 +17,7 @@ if os.getenv("DISABLE_VECTOR_SEARCH") == "True" or os.getenv("RENDER") == "true"
 else:
     try:
         import faiss
+        import numpy as np
         from sentence_transformers import SentenceTransformer
         FAISS_AVAILABLE = True
         logger.info("FAISS and SentenceTransformers loaded successfully.")
@@ -154,11 +155,12 @@ vector_db = VectorDB()
 
 def reinitialize_libraries():
     """Attempt to reload FAISS & SentenceTransformers if they were installed after first load."""
-    global FAISS_AVAILABLE, SentenceTransformer, faiss
+    global FAISS_AVAILABLE, SentenceTransformer, faiss, np
     if os.getenv("DISABLE_VECTOR_SEARCH") == "True" or os.getenv("RENDER") == "true":
         return
     try:
         import faiss
+        import numpy as np
         from sentence_transformers import SentenceTransformer
         FAISS_AVAILABLE = True
         logger.info("FAISS and SentenceTransformers reloaded successfully.")
