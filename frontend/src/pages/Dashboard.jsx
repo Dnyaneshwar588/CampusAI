@@ -73,7 +73,7 @@ export default function Dashboard() {
           <Link to="/profile" className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/10">
             Fill Out Profile Manual
           </Link>
-          <Link to="/resume" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-bold px-6 py-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+          <Link to="/resume" className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-emerald-500/10">
             Upload PDF Resume (Auto-fill)
           </Link>
         </div>
