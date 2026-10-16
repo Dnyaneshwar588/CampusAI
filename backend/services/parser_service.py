@@ -204,7 +204,8 @@ def parse_resume(pdf_path: str) -> Dict:
         ai_info = extract_profile_data_with_gemini(raw_text)
         
         # Merge results, prioritize AI parsed data but use local as backup
-        name = ai_info.get("name") or local_info.get("name") or "Candidate"
+        # A resume header is more reliable than an AI placeholder such as "Candidate".
+        name = local_info.get("name") or ai_info.get("name") or "Candidate"
         college = ai_info.get("college", spacy_info.get("education", [""])[0] if spacy_info.get("education") else "")
         college = college or local_info.get("college", "")
         branch = ai_info.get("branch") or local_info.get("branch", "")
