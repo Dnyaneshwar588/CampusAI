@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from groq import Groq
 from backend.config import settings
 
@@ -7,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 # Initialize clients
 _groq_client = None
+_gemini_model = None
 
 if settings.GROQ_API_KEY:
     _groq_client = Groq(api_key=settings.GROQ_API_KEY)
@@ -16,7 +18,7 @@ if not _groq_client:
     logger.warning("GROQ_API_KEY is not set. Running in dummy mock response mode.")
 
 # Model to use for Groq
-GROQ_MODEL = "llama-3.1-8b-instant"
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-20b")
 
 
 def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:

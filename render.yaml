@@ -13,11 +13,13 @@ services:
     plan: free
     envVars:
       - key: DATABASE_URL
-        value: postgresql://campusai_user:7vEMP6P64PF2AXYSg0290mC8TSwM7VGJ@dpg-d98ch6d7vvec739cbitg-a.oregon-postgres.render.com/campusai
+        sync: false        # Paste the Render PostgreSQL Internal Database URL
       - key: JWT_SECRET
         generateValue: true
       - key: GROQ_API_KEY
         sync: false          # You will paste this in the Render dashboard
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
       - key: GEMINI_API_KEY
         sync: false          # You will paste this in the Render dashboard
       - key: ALLOWED_ORIGINS
