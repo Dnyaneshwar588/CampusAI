@@ -16,7 +16,7 @@ if not _groq_client:
     logger.warning("GROQ_API_KEY is not set. Running in dummy mock response mode.")
 
 # Model to use for Groq
-GROQ_MODEL = "llama-3.3-70b-versatile"
+GROQ_MODEL = "llama-3.1-8b-instant"
 
 
 def run_gemini_prompt(prompt: str, system_instruction: str = None) -> str:
@@ -80,21 +80,8 @@ def _parse_json_cleanup(raw: str, e: Exception) -> dict:
 
 def extract_profile_data_with_gemini(resume_text: str) -> dict:
     """Extract profile fields structured in JSON from the parsed resume text."""
-    if not _groq_client and not _gemini_model:
-        # Mock fallback profile
-        return {
-            "name": "Alex Mercer",
-            "college": "State Technical University",
-            "branch": "Computer Science & Engineering",
-            "grad_year": 2026,
-            "cgpa": 8.2,
-            "skills": ["Java", "Python", "SQL", "React", "Data Structures"],
-            "programming_languages": ["Python", "Java", "SQL"],
-            "projects": [
-                {"title": "E-Commerce Backend API", "description": "Developed a secure REST API with FastAPI and PostgreSQL."}
-            ],
-            "certifications": ["AWS Certified Cloud Practitioner"]
-        }
+    if not _groq_client:
+        return {}
 
     prompt = f"""
     Analyze the following resume text and extract the candidate's details in a clean structured JSON format.
@@ -119,14 +106,9 @@ def extract_profile_data_with_gemini(resume_text: str) -> dict:
     system_instruction = "You are a professional recruiting assistant parser designed to extract resume information into schema-compliant JSON."
     try:
         return run_gemini_json_prompt(prompt, system_instruction)
-    except Exception:
-        return {
-            "name": "Candidate",
-            "skills": [],
-            "programming_languages": [],
-            "projects": [],
-            "certifications": []
-        }
+    except Exception as exc:
+        logger.error(f"Resume profile extraction failed: {exc}")
+        return {}
 
 
 def analyze_resume_with_gemini(resume_text: str) -> dict:

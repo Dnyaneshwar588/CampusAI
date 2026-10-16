@@ -55,6 +55,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 def local_regex_extraction(text: str) -> Dict:
     """Extract skills, certifications, and education using keyword matching and regex."""
     text_lower = text.lower()
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
     
     # 1. Skills extraction
     found_skills = []
@@ -90,7 +91,44 @@ def local_regex_extraction(text: str) -> Dict:
         except ValueError:
             pass
 
+    name = ""
+    if lines:
+        first_line = re.sub(r"\s+", " ", lines[0]).strip()
+        if (
+            len(first_line.split()) <= 6
+            and not re.search(r"@|resume|curriculum|summary|skills|experience", first_line, re.I)
+        ):
+            name = first_line
+
+    college = ""
+    for line in lines:
+        if re.search(r"\b(university|college|institute|school)\b", line, re.I):
+            college = re.sub(r"^(education|college|university)\s*[:|-]\s*", "", line, flags=re.I)
+            break
+
+    branch = ""
+    branch_match = re.search(
+        r"\b(?:branch|speciali[sz]ation|major|degree)\s*[:|-]?\s*([^\n|,]{3,80})",
+        text,
+        re.I,
+    )
+    if branch_match:
+        branch = branch_match.group(1).strip(" .")
+
+    grad_year = None
+    grad_match = re.search(
+        r"\b(?:graduat(?:ed|ion)|passing|expected|class of|batch)\D{0,20}(20\d{2})\b",
+        text,
+        re.I,
+    )
+    if grad_match:
+        grad_year = int(grad_match.group(1))
+
     return {
+        "name": name,
+        "college": college,
+        "branch": branch,
+        "grad_year": grad_year,
         "skills": found_skills,
         "programming_languages": found_languages,
         "certifications": certs[:5],
@@ -166,28 +204,33 @@ def parse_resume(pdf_path: str) -> Dict:
         ai_info = extract_profile_data_with_gemini(raw_text)
         
         # Merge results, prioritize AI parsed data but use local as backup
-        name = ai_info.get("name", "Candidate")
+        name = ai_info.get("name") or local_info.get("name") or "Candidate"
         college = ai_info.get("college", spacy_info.get("education", [""])[0] if spacy_info.get("education") else "")
-        branch = ai_info.get("branch", "")
-        grad_year = ai_info.get("grad_year")
+        college = college or local_info.get("college", "")
+        branch = ai_info.get("branch") or local_info.get("branch", "")
+        grad_year = ai_info.get("grad_year") or local_info.get("grad_year")
         cgpa = ai_info.get("cgpa", local_info.get("cgpa", 0.0))
         
         # Ensure we have skills and programming languages
-        skills = ai_info.get("skills", local_info.get("skills", []))
-        languages = ai_info.get("programming_languages", local_info.get("programming_languages", []))
-        projects = ai_info.get("projects", [])
-        certifications = ai_info.get("certifications", local_info.get("certifications", []))
+        skills = ai_info.get("skills") or local_info.get("skills", [])
+        languages = ai_info.get("programming_languages") or local_info.get("programming_languages", [])
+        projects = ai_info.get("projects") or []
+        certifications = ai_info.get("certifications") or local_info.get("certifications", [])
         
     except Exception as e:
         logger.error(f"Gemini resume extraction failed, using local extraction fallback: {e}")
-        name = "Candidate"
-        college = spacy_info.get("education", ["State Technical University"])[0] if spacy_info.get("education") else "State Technical University"
-        branch = "Computer Science"
-        grad_year = 2026
-        cgpa = local_info.get("cgpa", 7.5)
+        name = local_info.get("name") or "Candidate"
+        college = (
+            spacy_info.get("education", [""])[0]
+            if spacy_info.get("education")
+            else local_info.get("college", "")
+        )
+        branch = local_info.get("branch", "")
+        grad_year = local_info.get("grad_year")
+        cgpa = local_info.get("cgpa", 0.0)
         skills = local_info.get("skills", [])
         languages = local_info.get("programming_languages", [])
-        projects = [{"title": "Web Application Development", "description": "Developed dynamic web app utilizing FastAPI and React."}]
+        projects = []
         certifications = local_info.get("certifications", [])
 
     return {
